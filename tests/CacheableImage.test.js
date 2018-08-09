@@ -6,9 +6,11 @@
 import should from 'should'; // eslint-disable-line no-unused-vars
 import { mockData } from './mockData';
 import imageCacheHoc from '../lib/imageCacheHoc';
-import { Image } from 'react-native';
+import {Image, StyleSheet, Text, View} from 'react-native'
 import sinon from 'sinon';
 import 'should-sinon';
+import renderer from 'react-test-renderer'
+import React from 'react'
 
 describe('CacheableImage', function() {
 
@@ -85,7 +87,8 @@ describe('CacheableImage', function() {
       'source',
       'permanent',
       'style',
-      'placeholder'
+      'headers',
+      'placeholder',
     ]);
 
   });
@@ -327,7 +330,36 @@ describe('CacheableImage', function() {
     console.warn = consoleWarnCache; // eslint-disable-line no-console
 
   });
-
+  
+  
+  it('_loadImage should call filesystem module with headers for remote call ', async () => {
+    const FileSystem = require('../lib/FileSystem').default;
+    FileSystem.prototype.getLocalFilePathFromUrl = sinon.spy();
+    
+    const headers = {
+      'Authorization': 'My Auth Token',
+    };
+  
+    const CacheableImage = imageCacheHoc(Image);
+    const cacheableImage = new CacheableImage({...mockData.mockCacheableImageProps, headers});
+    cacheableImage.setState = jest.fn();
+  
+    // Ensure that if component is mounted then immediately unmounted before componentDidMount() finishes
+    // executing, setState() will not be called by an unmounted component when componentDidMount() resumes execution after
+    // completing async work.
+    // See: https://github.com/billmalarky/react-native-image-cache-hoc/issues/6#issuecomment-354490597
+    cacheableImage.componentDidMount();
+  
+    // Wait for componentDidMount() to complete execution.
+    await new Promise((resolve) => {
+      setTimeout(resolve, 1000);
+    });
+    
+    FileSystem.prototype.getLocalFilePathFromUrl.calledWith(mockData.mockCacheableImageProps.source.uri, headers);
+  
+  });
+  
+  
   it('componentWillReceiveProps should not throw any uncaught errors.', () => {
 
     const CacheableImage = imageCacheHoc(Image);

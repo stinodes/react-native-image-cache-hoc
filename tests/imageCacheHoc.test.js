@@ -203,5 +203,4 @@ describe('CacheableImage', function() {
      */
 
   });
-
 });
