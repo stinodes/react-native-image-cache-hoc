@@ -6,11 +6,9 @@
 import should from 'should'; // eslint-disable-line no-unused-vars
 import { mockData } from './mockData';
 import imageCacheHoc from '../lib/imageCacheHoc';
-import {Image, StyleSheet, Text, View} from 'react-native'
+import {Image} from 'react-native';
 import sinon from 'sinon';
 import 'should-sinon';
-import renderer from 'react-test-renderer'
-import React from 'react'
 
 describe('CacheableImage', function() {
 
@@ -86,8 +84,12 @@ describe('CacheableImage', function() {
       'fileHostWhitelist',
       'source',
       'permanent',
+      'fileName',
+      'extension',
       'style',
       'headers',
+      'onReject',
+      'rejected',
       'placeholder',
     ]);
 

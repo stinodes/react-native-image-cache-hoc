@@ -246,6 +246,77 @@ describe('lib/FileSystem', function() {
       });
 
   });
+  
+  
+  it('#getLocalFilePathFromUrl should use the passed fileName when defined.', () => {
+    
+    const RNFetchBlob = require('react-native-fetch-blob');
+    RNFetchBlob.config.mockClear();
+    RNFetchBlob.fetch.mockClear();
+    
+    RNFetchBlob.fs.exists
+      .mockReturnValueOnce(false) // mock not exist in local permanent dir
+      .mockReturnValueOnce(false) // mock not exist in local cache dir
+      .mockReturnValueOnce(false) // mock does not exist to get past clobber
+      .mockReturnValue(true);
+  
+    RNFetchBlob.fetch
+      .mockReturnValue({
+        path: () => {
+          return '/this/is/path/to/file.jpg';
+        }
+      });
+  
+    const fileSystem = FileSystemFactory();
+    const fileName = 'MyFile.png';
+  
+    return fileSystem.getLocalFilePathFromUrl(
+      'https://img.wennermedia.com/5333a62d-07db-432a-92e2-198cafa38a14-326adb1a-d8ed-4a5d-b37e-5c88883e1989.png',
+      {fileName},
+    )
+      .then(() => {
+        RNFetchBlob.config.mock.calls[0][0].path
+          .should
+          .equal(
+            '/base/file/path/react-native-image-cache-hoc/cache/' + fileName
+          );
+      });
+  });
+  
+  it('#getLocalFilePathFromUrl should use the passed extension when defined.', () => {
+    
+    const RNFetchBlob = require('react-native-fetch-blob');
+    RNFetchBlob.config.mockClear();
+    RNFetchBlob.fetch.mockClear();
+    
+    RNFetchBlob.fs.exists
+      .mockReturnValueOnce(false) // mock not exist in local permanent dir
+      .mockReturnValueOnce(false) // mock not exist in local cache dir
+      .mockReturnValueOnce(false) // mock does not exist to get past clobber
+      .mockReturnValue(true);
+    
+    RNFetchBlob.fetch
+      .mockReturnValue({
+        path: () => {
+          return '/this/is/path/to/file.jpg';
+        }
+      });
+    
+    const fileSystem = FileSystemFactory();
+    const extension = 'myext';
+    
+    return fileSystem.getLocalFilePathFromUrl(
+      'https://img.wennermedia.com/5333a62d-07db-432a-92e2-198cafa38a14-326adb1a-d8ed-4a5d-b37e-5c88883e1989.png',
+      {extension},
+    )
+      .then(() => {
+        RNFetchBlob.config.mock.calls[0][0].path
+          .should
+          .equal(
+            '/base/file/path/react-native-image-cache-hoc/cache/cd7d2199cd8e088cdfd9c99fc6359666adc36289.' + extension
+          );
+      });
+  });
 
   it('#fetchFile should validate path.', () => {
 
@@ -253,7 +324,7 @@ describe('lib/FileSystem', function() {
 
     let badFileName = '../../../../bad-filename.jpg';
 
-    return fileSystem.fetchFile('https://google.com/arbitrary.jpg', true, badFileName)
+    return fileSystem.fetchFile('https://google.com/arbitrary.jpg', {permanent: true, fileName: badFileName})
       .then(() => {
         throw new Error('Bad file name was not caught.');
       })
@@ -277,7 +348,9 @@ describe('lib/FileSystem', function() {
       });
 
     // fileSystem.exists() is mocked to always return true, so error should always be thrown unless clobber is set to true.
-    return fileSystem.fetchFile('https://img.wennermedia.com/5333a62d-07db-432a-92e2-198cafa38a14-326adb1a-d8ed-4a5d-b37e-5c88883e1989.png')
+    return fileSystem.fetchFile(
+      'https://img.wennermedia.com/5333a62d-07db-432a-92e2-198cafa38a14-326adb1a-d8ed-4a5d-b37e-5c88883e1989.png',
+    )
       .then(() => {
         throw new Error('Clobber logic failed, a file was overwritten.');
       })
@@ -307,7 +380,10 @@ describe('lib/FileSystem', function() {
     };
 
     // fileSystem.exists() is mocked to always return true, so error should always be thrown unless clobber is set to true.
-    return fileSystem.fetchFile('https://img.wennermedia.com/5333a62d-07db-432a-92e2-198cafa38a14-326adb1a-d8ed-4a5d-b37e-5c88883e1989.png', true, null, true)
+    return fileSystem.fetchFile(
+      'https://img.wennermedia.com/5333a62d-07db-432a-92e2-198cafa38a14-326adb1a-d8ed-4a5d-b37e-5c88883e1989.png',
+      {permanent: true, clobber: true},
+    )
       .then(() => {
         pruneCacheHit.should.be.false();
       });
@@ -334,7 +410,10 @@ describe('lib/FileSystem', function() {
     };
 
     // fileSystem.exists() is mocked to always return true, so error should always be thrown unless clobber is set to true.
-    return fileSystem.fetchFile('https://img.wennermedia.com/5333a62d-07db-432a-92e2-198cafa38a14-326adb1a-d8ed-4a5d-b37e-5c88883e1989.png', false, null, true)
+    return fileSystem.fetchFile(
+      'https://img.wennermedia.com/5333a62d-07db-432a-92e2-198cafa38a14-326adb1a-d8ed-4a5d-b37e-5c88883e1989.png',
+      {clobber: true},
+    )
       .then(() => {
         pruneCacheHit.should.be.true();
       });
@@ -357,7 +436,10 @@ describe('lib/FileSystem', function() {
     fileSystem.pruneCache = () => {};
 
     // fileSystem.exists() is mocked to always return true, so error should always be thrown unless clobber is set to true.
-    return fileSystem.fetchFile('https://img.wennermedia.com/5333a62d-07db-432a-92e2-198cafa38a14-326adb1a-d8ed-4a5d-b37e-5c88883e1989.png', false, null, true)
+    return fileSystem.fetchFile(
+      'https://img.wennermedia.com/5333a62d-07db-432a-92e2-198cafa38a14-326adb1a-d8ed-4a5d-b37e-5c88883e1989.png',
+      {clobber: true},
+    )
       .then((result) => {
 
         result.should.deepEqual({

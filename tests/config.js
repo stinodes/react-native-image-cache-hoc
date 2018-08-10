@@ -48,9 +48,7 @@ jest.mock('react-native-fetch-blob', () => {
     }
   };
 
-  mockRNFetchBlob.config = () => {
-    return mockRNFetchBlob; // Must return reference to self to support method chaining.
-  };
+  mockRNFetchBlob.config = jest.fn(() => mockRNFetchBlob);
 
   mockRNFetchBlob.fetch = jest.fn();
 
