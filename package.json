@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "./node_modules/.bin/jest --coverage && if [ \"$COVERALLS_ENV\" = \"production\" ]; then cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js; fi",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "flow": "flow",
+    "prettier": "prettier --jsx-bracket-same-line true --single-quote --trailing-comma all --write \"./src/**\""
   },
   "repository": {
     "type": "git",
@@ -34,11 +36,13 @@
     "babel-eslint": "^8.0.1",
     "coveralls": "^3.0.0",
     "eslint": "^4.9.0",
+    "eslint-plugin-flowtype": "^2.50.0",
     "eslint-plugin-react": "^7.4.0",
     "eslint-plugin-react-native": "^3.1.0",
+    "flow-bin": "0.67",
     "jest": "^23.4.2",
-    "react": "^16.0.0",
-    "react-native": "^0.50.1",
+    "react": "16.3",
+    "react-native": "^0.55.4",
     "react-test-renderer": "^16.0.0",
     "should": "^13.1.2",
     "should-sinon": "^0.0.6",
@@ -53,7 +57,9 @@
   "dependencies": {
     "buffer": "^5.0.8",
     "crypto-js": "^3.1.9-1",
+    "fnional": "^0.0.5",
     "path": "^0.12.7",
+    "prettier": "^1.14.2",
     "prop-types": "^15.6.0",
     "react-native-fetch-blob": "0.10.8",
     "react-native-uuid": "^1.4.9",
